@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Calculadora de Transferencia</title>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         :root {
-            --bg: #000000; /* Fondo negro puro */
-            --card: #141414; /* Tarjetas ligeramente más claras para contraste */
+            --bg: #000000;
+            --card: #141414;
             --input-bg: #1f1f1f;
             --fb: #3b82f6;
             --me: #22c55e;
             --bi: #f59e0b;
             --danger: #ef4444;
-            --text: #ffffff;
+            --text: #ffffff; /* Blanco para máxima visibilidad */
             --text-dim: #a1a1aa;
         }
 
@@ -22,12 +23,12 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            height: auto; /* Ajuste para GitHub Pages */
-            min-height: 100vh; /* Asegura que ocupe al menos la altura de la vista */
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text);
         }
 
         .header-container {
@@ -38,29 +39,9 @@
             box-sizing: border-box;
         }
 
-        .main-title {
-            color: var(--text);
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-
-        .sub-title {
-            color: var(--text-dim);
-            font-size: 0.85rem;
-            margin: 8px 0 0 0;
-            font-weight: 400;
-            letter-spacing: 0.5px;
-        }
-
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #333, transparent);
-            margin: 15px auto;
-            width: 80%;
-        }
+        .main-title { font-size: 1.4rem; font-weight: 700; margin: 0; text-transform: uppercase; color: var(--text); }
+        .sub-title { color: var(--text-dim); font-size: 0.85rem; margin: 8px 0 0 0; }
+        .divider { height: 1px; background: linear-gradient(90deg, transparent, #333, transparent); margin: 15px auto; width: 80%; }
 
         .card {
             background: var(--card);
@@ -69,7 +50,7 @@
             width: 100%;
             max-width: 480px;
             border-radius: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             border: 1px solid #222;
         }
 
@@ -92,10 +73,9 @@
             border-radius: 9px;
             font-size: 0.75rem;
             font-weight: bold;
-            transition: 0.3s;
         }
 
-        .mode-btn.active { background: var(--fb); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .mode-btn.active { background: var(--fb); color: white; }
 
         .section {
             background: rgba(255,255,255,0.02);
@@ -107,27 +87,20 @@
 
         label { display: block; font-size: 0.65rem; color: var(--text-dim); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; }
         
-        .fix-tag { font-size: 0.55rem; background: #27272a; color: #a1a1aa; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
-        .mod-tag { font-size: 0.55rem; background: #064e3b; color: #34d399; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
-
         input {
             width: 100%;
             padding: 14px;
             border: 1px solid #333;
             border-radius: 10px;
             font-size: 16px;
-            box-sizing: border-box;
-            margin-bottom: 5px;
             background: var(--input-bg);
             color: white;
             outline: none;
-            transition: border-color 0.2s;
+            box-sizing: border-box;
         }
 
-        input:focus { border-color: var(--fb); }
-
         .bank-summary { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 12px; border: 1px solid #262626; margin-top: 10px; }
-        .summary-line { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px; }
+        .summary-line { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px; color: var(--text); }
         .val-minus { color: var(--danger); font-weight: 600; }
         .val-plus { color: var(--me); font-weight: 600; }
         .highlight { color: var(--fb); font-weight: 700; }
@@ -139,115 +112,41 @@
             padding: 20px;
             border-radius: 16px;
             text-align: center;
-            margin-top: 10px;
         }
 
-        .res-val { font-size: 2.2rem; font-weight: 800; display: block; margin: 5px 0; letter-spacing: -1px; }
-        .hidden { display: none; }
+        .res-val { font-size: 2.2rem; font-weight: 800; display: block; color: white; }
 
-        /* Estilos para el botón de compartir */
-        .share-button-container {
-            text-align: center;
-            margin-top: 20px;
-            margin-bottom: 40px; /* Espacio para el pie de página */
-        }
-        .share-button {
-            background-color: #25d366; /* Color de WhatsApp */
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
-        }
-        .share-button:hover {
-            background-color: #1da851;
-        }
-        .whatsapp-icon {
-            width: 20px;
-            height: 20px;
-            vertical-align: middle;
-        }
-
-        /* Contenedor para la imagen (oculto por defecto) */
-        #screenshotContainer {
-            background-color: var(--card); /* Fondo para la imagen */
-            padding: 20px;
-            border-radius: 20px;
-            border: 1px solid #222;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-            max-width: 480px;
+        /* Botón de WhatsApp */
+        .share-container { width: 100%; max-width: 480px; padding: 0 15px; box-sizing: border-box; margin-bottom: 40px; }
+        .btn-whatsapp {
             width: 100%;
-            box-sizing: border-box;
-            margin-top: 20px;
-            text-align: left; /* Para que el texto interno no se centre */
-            display: none; /* Oculto por defecto */
-        }
-        #screenshotContainer h3 {
-            color: var(--text);
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-            text-align: center;
-            text-transform: uppercase;
-            border-bottom: 1px solid #333;
-            padding-bottom: 10px;
-        }
-        #screenshotContainer p {
-            font-size: 0.85rem;
-            color: var(--text);
-            margin-bottom: 8px;
-            line-height: 1.4;
-        }
-        #screenshotContainer .label {
-            color: var(--text-dim);
+            background: #25d366;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
             font-weight: bold;
-            margin-right: 5px;
-        }
-        #screenshotContainer .value {
-            color: var(--text);
-            font-weight: normal;
-        }
-        #screenshotContainer .positive { color: var(--me); font-weight: bold; }
-        #screenshotContainer .negative { color: var(--danger); font-weight: bold; }
-        #screenshotContainer .highlight-final {
-            color: var(--me);
-            font-size: 1.5rem;
-            font-weight: bold;
-            display: block;
-            text-align: center;
-            margin-top: 15px;
-        }
-        #screenshotContainer .footer-text {
-            font-size: 0.7rem;
-            color: var(--text-dim);
-            text-align: center;
-            margin-top: 20px;
-            opacity: 0.7;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
-        /* Loader */
-        .loader {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: none; /* Oculto por defecto */
-            margin-left: 10px;
+        /* Estilos para el área que se capturará (Invisible en la web) */
+        #capture-area {
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            width: 400px;
+            background: #141414;
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -258,102 +157,69 @@
         <div class="divider"></div>
     </div>
 
-    <div class="card" id="calculatorCard">
+    <div class="card" id="mainCard">
         <div class="mode-selector">
             <button id="btnMontoR" class="mode-btn active" onclick="setMode('recarga')">POR RECARGA</button>
             <button id="btnDispo" class="mode-btn" onclick="setMode('disponible')">POR DISPONIBLE FB</button>
         </div>
 
         <div class="section" id="secMontoR" style="border-top: 3px solid var(--me);">
-            <label>Monto a recargar en Mercantil (USD) <span class="mod-tag">Variable</span></label>
+            <label id="lblInput">Monto a recargar en Mercantil/Zinli (USD)</label>
             <input type="number" id="montoR" value="100" oninput="calc()" step="any" inputmode="decimal">
         </div>
 
         <div class="section hidden" id="secDispo" style="border-top: 3px solid var(--fb);">
-            <label>Saldo Total en Facebank ($) <span class="mod-tag">Variable</span></label>
+            <label>Saldo Total en Facebank ($)</label>
             <input type="number" id="montoDispo" value="100" oninput="calc()" step="any" inputmode="decimal">
         </div>
 
         <div class="section" style="border-left: 4px solid var(--fb);">
-            <label>% Comisión Tarjeta <span class="fix-tag">Comisión Fija</span></label>
-            <input type="number" id="pFb" value="2.8" oninput="calc()" inputmode="decimal">
-            
+            <label>Facebank <small>(2.8% Fijo)</small></label>
             <div class="bank-summary">
-                <div class="summary-line"><span>Comisión Bancaria:</span><span id="vFb" class="val-minus">-$0.00</span></div>
+                <div class="summary-line"><span>Comisión:</span><span id="vFb" class="val-minus">-$0.00</span></div>
                 <div class="summary-line"><span>Neto Enviado:</span><span id="vNetoEnviado" class="highlight">$0.00</span></div>
-                <div class="summary-line total-row"><span>Debitado de Cuenta:</span><span id="totalFB" style="color:var(--text)">$0.00</span></div>
+                <div class="summary-line total-row"><span>Total en Cuenta:</span><span id="totalFB">$0.00</span></div>
             </div>
         </div>
 
         <div class="section" style="border-left: 4px solid var(--me);">
-            <div class="bank-summary" style="margin-bottom: 12px; border-color: #333; background: #1a1a1a;">
-                <div class="summary-line">
-                    <span style="font-weight: bold; font-size: 0.75rem;">MONTO RECARGA MERCANTIL:</span>
-                    <span id="vMontoRecargaMe" class="val-plus">$0.00</span>
-                </div>
-            </div>
-            <label>% Comisión Recarga <span class="fix-tag">Fija</span></label>
-            <input type="number" id="pMe" value="5.0" oninput="calc()" inputmode="decimal">
-            <label>% ITBMS s/Comisión <span class="fix-tag">Fija (7%)</span></label>
-            <input type="number" id="pIt" value="7.0" oninput="calc()" inputmode="decimal">
-            
+            <label>Mercantil Panamá / Zinli</label>
             <div class="bank-summary">
-                <div class="summary-line"><span>Comisiones PA:</span><span id="vMeTotal" class="val-minus">-$0.00</span></div>
-                <div class="summary-line total-row"><span>Saldo Real Neto PA:</span><span id="t2" class="val-plus">$0.00</span></div>
+                <div class="summary-line"><span>Comisiones (5.35%):</span><span id="vMeTotal" class="val-minus">-$0.00</span></div>
+                <div class="summary-line total-row"><span>Saldo Real Neto:</span><span id="t2" class="val-plus">$0.00</span></div>
             </div>
         </div>
 
         <div class="section" style="border-left: 4px solid var(--bi);">
-            <div style="display: flex; gap: 10px;">
-                <div style="flex: 1.4;">
-                    <label>Tasa P2P <span class="mod-tag">Modificable</span></label>
-                    <input type="number" id="tasa" value="1.030" step="0.001" oninput="calc()" inputmode="decimal">
-                </div>
-                <div style="flex: 1;">
-                    <label>Taker Fee <span class="fix-tag">Fija</span></label>
-                    <input type="number" id="cTaker" value="0.08" oninput="calc()" inputmode="decimal">
-                </div>
-            </div>
+            <label>Tasa P2P Binance</label>
+            <input type="number" id="tasa" value="1.030" step="0.001" oninput="calc()" inputmode="decimal">
         </div>
 
         <div class="results">
-            <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; opacity: 0.9;">Neto Final Binance</div>
+            <small style="text-transform: uppercase; font-weight: bold; opacity: 0.8;">Neto Final Binance</small>
             <span id="rBi" class="res-val">0.00 USDT</span>
-            <div style="font-size: 0.75rem; font-weight: 500;" id="vLoss">Fricción total: $0.00</div>
-        </div>
-
-        <div class="share-button-container">
-            <button class="share-button" onclick="shareResults()">
-                Compartir por WhatsApp
-                <div class="loader" id="shareLoader"></div>
-            </button>
+            <small id="vLoss" style="font-weight: bold;">Fricción: $0.00</small>
         </div>
     </div>
 
-    <div id="screenshotContainer">
-        <h3>Resumen de Transferencia</h3>
-        <p><span class="label">Modo de Cálculo:</span> <span id="shareMode"></span></p>
-        
-        <p><span class="label">Monto Origen:</span> <span id="shareMontoOrigen"></span></p>
-        <p><span class="label">Comisión Facebank:</span> <span id="shareFbComision" class="negative"></span></p>
-        <p><span class="label">Neto a Mercantil:</span> <span id="shareNetoEnviado" class="positive"></span></p>
-        
-        <p><span class="label">Comisiones Mercantil:</span> <span id="shareMeComision" class="negative"></span></p>
-        <p><span class="label">Saldo Real en PA:</span> <span id="shareSaldoRealMe" class="positive"></span></p>
-        
-        <p><span class="label">Tasa P2P:</span> <span id="shareTasa"></span></p>
-        <p><span class="label">Taker Fee (Binance):</span> <span id="shareTakerFee" class="negative"></span></p>
-        
-        <p style="margin-top: 15px;"><span class="label">USDT Recibidos:</span> <span id="shareUsdtNetos" class="highlight-final"></span></p>
-        <p><span class="label">Fricción Total del Proceso:</span> <span id="shareFriccionTotal" class="negative"></span></p>
-        <p class="footer-text">Calculado con la App de Conversión.</p>
+    <div class="share-container">
+        <button class="btn-whatsapp" onclick="shareAsImage()">
+            Compartir en WhatsApp
+        </button>
     </div>
 
+    <div id="capture-area">
+        <h2 style="color:#22c55e; margin:0; font-size:18px;">Resumen de Operación</h2>
+        <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
+        <div id="cap-details" style="font-size:14px; line-height:1.8;"></div>
+        <div id="cap-result" style="margin-top:20px; padding:15px; background:#1a1a1a; border-radius:10px; text-align:center;"></div>
+    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         let currentMode = 'recarga';
-        
+        const pFb = 2.8;
+        const pMeTotal = 5.35; // 5% + ITBMS
+
         function setMode(mode) {
             currentMode = mode;
             document.getElementById('btnMontoR').classList.toggle('active', mode === 'recarga');
@@ -364,120 +230,72 @@
         }
 
         function calc() {
-            const pFb = parseFloat(document.getElementById('pFb').value) || 0;
-            const pMe = parseFloat(document.getElementById('pMe').value) || 0;
-            const pIt = parseFloat(document.getElementById('pIt').value) || 0;
+            let montoRecarga = 0; let totalFB = 0; let comisionFB = 0;
             const tasa = parseFloat(document.getElementById('tasa').value) || 1;
-            const cTaker = parseFloat(document.getElementById('cTaker').value) || 0;
-
-            let montoRecarga = 0; let totalCuentaFB = 0; let comisionFB = 0;
 
             if (currentMode === 'recarga') {
                 montoRecarga = parseFloat(document.getElementById('montoR').value) || 0;
                 comisionFB = montoRecarga * (pFb / 100);
-                totalCuentaFB = montoRecarga + comisionFB;
+                totalFB = montoRecarga + comisionFB;
             } else {
-                totalCuentaFB = parseFloat(document.getElementById('montoDispo').value) || 0;
-                montoRecarga = totalCuentaFB / (1 + (pFb / 100));
-                comisionFB = totalCuentaFB - montoRecarga;
+                totalFB = parseFloat(document.getElementById('montoDispo').value) || 0;
+                montoRecarga = totalFB / (1 + (pFb / 100));
+                comisionFB = totalFB - montoRecarga;
             }
 
-            const comMePura = montoRecarga * (pMe / 100);
-            const taxItbms = comMePura * (pIt / 100);
-            const totalComMe = comMePura + taxItbms;
-            const netoMe = montoRecarga - totalComMe;
-            const usdtNetos = (netoMe / tasa) - cTaker;
+            const comMe = montoRecarga * (pMeTotal / 100);
+            const netoMe = montoRecarga - comMe;
+            const usdt = (netoMe / tasa) - 0.08;
 
             // Update UI
             document.getElementById('vFb').innerText = "-$" + comisionFB.toFixed(2);
             document.getElementById('vNetoEnviado').innerText = "$" + montoRecarga.toFixed(2);
-            document.getElementById('totalFB').innerText = "$" + totalCuentaFB.toFixed(2);
-            document.getElementById('vMontoRecargaMe').innerText = "$" + montoRecarga.toFixed(2);
-            document.getElementById('vMeTotal').innerText = "-$" + totalComMe.toFixed(2);
+            document.getElementById('totalFB').innerText = "$" + totalFB.toFixed(2);
+            document.getElementById('vMeTotal').innerText = "-$" + comMe.toFixed(2);
             document.getElementById('t2').innerText = "$" + netoMe.toFixed(2);
-            document.getElementById('rBi').innerText = (usdtNetos > 0 ? usdtNetos : 0).toFixed(2) + " USDT";
-            
-            const perdidaTotal = totalCuentaFB - (usdtNetos * tasa);
-            document.getElementById('vLoss').innerText = "Fricción total: $" + (perdidaTotal > 0 ? perdidaTotal : 0).toFixed(2);
-
-            // Populate hidden container for screenshot
-            document.getElementById('shareMode').innerText = (currentMode === 'recarga' ? 'Por Recarga: $' + montoRecarga.toFixed(2) : 'Por Disponible FB: $' + totalCuentaFB.toFixed(2));
-            document.getElementById('shareMontoOrigen').innerText = (currentMode === 'recarga' ? '$' + totalCuentaFB.toFixed(2) + ' (FB Debitado)' : '$' + totalCuentaFB.toFixed(2) + ' (FB Disponible)');
-            document.getElementById('shareFbComision').innerText = '-$' + comisionFB.toFixed(2);
-            document.getElementById('shareNetoEnviado').innerText = '$' + montoRecarga.toFixed(2);
-            document.getElementById('shareMeComision').innerText = '-$' + totalComMe.toFixed(2);
-            document.getElementById('shareSaldoRealMe').innerText = '$' + netoMe.toFixed(2);
-            document.getElementById('shareTasa').innerText = tasa.toFixed(3);
-            document.getElementById('shareTakerFee').innerText = '-' + cTaker.toFixed(2) + ' USDT';
-            document.getElementById('shareUsdtNetos').innerText = (usdtNetos > 0 ? usdtNetos : 0).toFixed(2) + ' USDT';
-            document.getElementById('shareFriccionTotal').innerText = '-$' + (perdidaTotal > 0 ? perdidaTotal : 0).toFixed(2);
+            document.getElementById('rBi').innerText = (usdt > 0 ? usdt : 0).toFixed(2) + " USDT";
+            document.getElementById('vLoss').innerText = "Fricción: $" + (totalFB - (usdt * tasa)).toFixed(2);
         }
 
-        // Función para compartir los resultados como imagen
-        async function shareResults() {
-            const shareButton = document.querySelector('.share-button');
-            const loader = document.getElementById('shareLoader');
-            
-            shareButton.disabled = true;
-            loader.style.display = 'inline-block';
+        async function shareAsImage() {
+            const area = document.getElementById('capture-area');
+            const details = document.getElementById('cap-details');
+            const res = document.getElementById('cap-result');
 
-            // 1. Mostrar el contenedor oculto con los resultados formateados
-            const screenshotContainer = document.getElementById('screenshotContainer');
-            screenshotContainer.style.display = 'block';
+            // Preparar el texto de la imagen
+            details.innerHTML = `
+                <b>Origen:</b> Facebank<br>
+                <b>Debitado de cuenta:</b> ${document.getElementById('totalFB').innerText}<br>
+                <b>Comisión FB:</b> ${document.getElementById('vFb').innerText}<br>
+                <b>Monto Recarga:</b> ${document.getElementById('vNetoEnviado').innerText}<br>
+                <b>Comisiones PA:</b> ${document.getElementById('vMeTotal').innerText}<br>
+                <b>Saldo en Mercantil:</b> ${document.getElementById('t2').innerText}<br>
+                <b>Tasa P2P:</b> ${document.getElementById('tasa').value}
+            `;
+            res.innerHTML = `
+                <div style="color:#aaa; font-size:12px;">RECIBES EN BINANCE</div>
+                <div style="color:#22c55e; font-size:28px; font-weight:bold;">${document.getElementById('rBi').innerText}</div>
+            `;
 
-            // 2. Generar la imagen con html2canvas
             try {
-                const canvas = await html2canvas(screenshotContainer, {
-                    backgroundColor: screenshotContainer.style.backgroundColor, // Usa el mismo color de fondo
-                    useCORS: true, // Importante para algunas fuentes o elementos externos
-                    logging: false, // Desactiva logs en consola
-                    scale: 2 // Escala para mayor resolución
-                });
-
-                // 3. Ocultar el contenedor de nuevo
-                screenshotContainer.style.display = 'none';
-
-                // 4. Convertir a Blob y compartir
-                canvas.toBlob(async function(blob) {
-                    try {
-                        const file = new File([blob], 'resumen_transferencia.png', { type: 'image/png' });
-                        if (navigator.share && navigator.canShare({ files: [file] })) {
-                            await navigator.share({
-                                files: [file],
-                                title: 'Resumen de Transferencia',
-                                text: 'Mira este cálculo de transferencia de fondos:'
-                            });
-                        } else {
-                            // Fallback para navegadores que no soportan Web Share API Level 2 (compartir archivos)
-                            // Generar un link de descarga o mostrar la imagen directamente
-                            const imgUrl = canvas.toDataURL('image/png');
-                            const a = document.createElement('a');
-                            a.href = imgUrl;
-                            a.download = 'resumen_transferencia.png';
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            alert('Tu navegador no soporta compartir imágenes directamente. Se ha descargado la imagen.');
-                        }
-                    } catch (error) {
-                        console.error('Error al compartir o descargar la imagen:', error);
-                        alert('No se pudo compartir la imagen. Inténtalo de nuevo.');
-                    } finally {
-                        shareButton.disabled = false;
-                        loader.style.display = 'none';
+                const canvas = await html2canvas(area, { backgroundColor: '#141414' });
+                canvas.toBlob(async (blob) => {
+                    const file = new File([blob], 'calculo.png', { type: 'image/png' });
+                    if (navigator.share) {
+                        await navigator.share({ files: [file], title: 'Mi Cálculo' });
+                    } else {
+                        const link = document.createElement('a');
+                        link.download = 'calculo.png';
+                        link.href = canvas.toDataURL();
+                        link.click();
                     }
-                }, 'image/png');
-
-            } catch (error) {
-                console.error('Error al generar la captura de pantalla:', error);
-                alert('Hubo un error al generar la imagen. Asegúrate de que los valores sean válidos.');
-                screenshotContainer.style.display = 'none'; // Asegúrate de ocultarlo si hay error
-                shareButton.disabled = false;
-                loader.style.display = 'none';
+                });
+            } catch (e) {
+                alert("Error al generar imagen. Prueba capturar pantalla.");
             }
         }
 
-        calc(); // Initial calculation
+        calc();
     </script>
 </body>
 </html>
