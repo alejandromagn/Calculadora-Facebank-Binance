@@ -1,0 +1,1 @@
+# Calculadora-Facebank-Binance
