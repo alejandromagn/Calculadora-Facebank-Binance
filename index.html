@@ -71,8 +71,9 @@
             color: var(--text-dim);
             cursor: pointer;
             border-radius: 9px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: bold;
+            text-transform: uppercase;
         }
 
         .mode-btn.active { background: var(--fb); color: white; }
@@ -159,8 +160,8 @@
 
     <div class="card" id="mainCard">
         <div class="mode-selector">
-            <button id="btnMontoR" class="mode-btn active" onclick="setMode('recarga')">POR RECARGA</button>
-            <button id="btnDispo" class="mode-btn" onclick="setMode('disponible')">POR DISPONIBLE FB</button>
+            <button id="btnMontoR" class="mode-btn active" onclick="setMode('recarga')">RECARGA TDD FACEBANK</button>
+            <button id="btnDispo" class="mode-btn" onclick="setMode('disponible')">DISPONIBLE FB</button>
         </div>
 
         <div class="section" id="secMontoR" style="border-top: 3px solid var(--me);">
@@ -174,7 +175,6 @@
         </div>
 
         <div class="section" style="border-left: 4px solid var(--fb);">
-            <div class="section-header" style="color: var(--fb); font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Análisis Facebank</div>
             <label>% Comisión Tarjeta <span class="fix-tag">Fija</span></label>
             <input type="number" id="pFb" value="2.8" oninput="calc()" inputmode="decimal">
             
@@ -186,7 +186,6 @@
         </div>
 
         <div class="section" style="border-left: 4px solid var(--me);">
-            <div class="section-header" style="color: var(--me); font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Abono Mercantil / Zinli</div>
             <label>% Comisión Recarga <span class="fix-tag">Fija</span></label>
             <input type="number" id="pMe" value="5.0" oninput="calc()" inputmode="decimal">
             <label>% ITBMS s/Comisión <span class="fix-tag">Fija</span></label>
@@ -199,10 +198,9 @@
         </div>
 
         <div class="section" style="border-left: 4px solid var(--bi);">
-            <div class="section-header" style="color: var(--bi); font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Binance P2P</div>
             <div style="display: flex; gap: 10px;">
                 <div style="flex: 1.4;">
-                    <label>Tasa P2P <span class="mod-tag">Modificable</span></label>
+                    <label>Tasa P2P <span class="mod-tag">Variable</span></label>
                     <input type="number" id="tasa" value="1.030" step="0.001" oninput="calc()" inputmode="decimal">
                 </div>
                 <div style="flex: 1;">
@@ -235,8 +233,24 @@
     <script>
         let currentMode = 'recarga';
 
+        // Al cargar la página, recuperar datos de localStorage
+        window.onload = function() {
+            if(localStorage.getItem('currentMode')) {
+                setMode(localStorage.getItem('currentMode'));
+            }
+            const fields = ['montoR', 'montoDispo', 'pFb', 'pMe', 'pIt', 'tasa', 'cTaker'];
+            fields.forEach(field => {
+                const savedValue = localStorage.getItem(field);
+                if (savedValue !== null) {
+                    document.getElementById(field).value = savedValue;
+                }
+            });
+            calc();
+        };
+
         function setMode(mode) {
             currentMode = mode;
+            localStorage.setItem('currentMode', mode);
             document.getElementById('btnMontoR').classList.toggle('active', mode === 'recarga');
             document.getElementById('btnDispo').classList.toggle('active', mode === 'disponible');
             document.getElementById('secMontoR').classList.toggle('hidden', mode === 'disponible');
@@ -250,6 +264,12 @@
             const pIt = parseFloat(document.getElementById('pIt').value) || 0;
             const tasa = parseFloat(document.getElementById('tasa').value) || 1;
             const cTaker = parseFloat(document.getElementById('cTaker').value) || 0;
+
+            // Guardar valores en tiempo real en localStorage
+            const fields = ['montoR', 'montoDispo', 'pFb', 'pMe', 'pIt', 'tasa', 'cTaker'];
+            fields.forEach(field => {
+                localStorage.setItem(field, document.getElementById(field).value);
+            });
 
             let montoRecarga = 0; let totalFB = 0; let comisionFB = 0;
 
@@ -284,7 +304,7 @@
             const res = document.getElementById('cap-result');
 
             details.innerHTML = `
-                <b>Modo:</b> ${currentMode === 'recarga' ? 'Por Recarga' : 'Por Disponible'}<br>
+                <b>Modo:</b> ${currentMode === 'recarga' ? 'Recarga TDD Facebank' : 'Por Disponible'}<br>
                 <b>Debitado Facebank:</b> ${document.getElementById('totalFB').innerText}<br>
                 <b>Neto a Recargar:</b> ${document.getElementById('vNetoEnviado').innerText}<br>
                 <b>Comisiones PA:</b> ${document.getElementById('vMeTotal').innerText}<br>
@@ -310,12 +330,9 @@
                     }
                 });
             } catch (e) {
-                alert("Error al generar imagen. Prueba con captura de pantalla normal.");
+                alert("Error al generar imagen.");
             }
         }
-
-        calc();
     </script>
 </body>
 </html>
-
