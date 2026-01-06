@@ -142,13 +142,12 @@
             background: #0a0a0a;
             color: white;
             padding: 30px;
-            border-radius: 0; /* Mejor para fotos de WhatsApp */
             font-family: Arial, sans-serif;
         }
 
         .cap-header { text-align: center; margin-bottom: 25px; }
         .cap-header h2 { color: var(--me); margin: 0; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
-        .cap-header p { color: #888; font-size: 12px; margin: 5px 0; }
+        .cap-header p { color: #888; font-size: 11px; margin: 5px 0; }
 
         .cap-card {
             background: #141414;
@@ -176,12 +175,10 @@
             border-radius: 15px;
             padding: 25px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .cap-result-label { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; margin-bottom: 10px; }
+        .cap-result-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; margin-bottom: 10px; }
         .cap-result-value { font-size: 36px; font-weight: 900; display: block; }
-        
         .cap-footer { text-align: center; color: #555; font-size: 10px; margin-top: 20px; text-transform: uppercase; }
 
         .hidden { display: none; }
@@ -217,16 +214,22 @@
             <div class="bank-summary">
                 <div class="summary-line"><span>Comisión:</span><span id="vFb" class="val-minus">-$0.00</span></div>
                 <div class="summary-line"><span>Neto Enviado:</span><span id="vNetoEnviado" class="highlight">$0.00</span></div>
-                <div class="summary-line total-row"><span>Total Debitado:</span><span id="totalFB">$0.00</span></div>
+                <div class="summary-line total-row"><span>Total Debitado FB:</span><span id="totalFB">$0.00</span></div>
             </div>
         </div>
 
         <div class="section" style="border-left: 4px solid var(--me);">
-            <label>% Comisión Recarga</label>
-            <input type="number" id="pMe" value="5.0" oninput="calc()" inputmode="decimal">
-            <label>% ITBMS s/Comisión</label>
-            <input type="number" id="pIt" value="7.0" oninput="calc()" inputmode="decimal">
-            <div class="bank-summary">
+            <div style="color: var(--me); font-size: 0.7rem; font-weight: bold; margin-bottom: 10px;">RECIBO PANAMÁ</div>
+            <label>% Com. Recarga</label>
+            <input type="number" id="pMe" value="5.0" oninput="calc()" inputmode="decimal" style="margin-bottom:10px;">
+            <label>% ITBMS s/Com.</label>
+            <input type="number" id="pIt" value="7.0" oninput="calc()" inputmode="decimal" style="margin-bottom:15px;">
+            
+            <div class="bank-summary" style="background: rgba(34, 197, 94, 0.05); border-color: #064e3b;">
+                <div class="summary-line" style="border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 8px;">
+                    <span style="font-size: 0.75rem;">Monto Recarga Portal:</span>
+                    <span id="vRecargaPortal" style="font-weight: 800; color: #fff; font-size: 1rem;">$0.00</span>
+                </div>
                 <div class="summary-line"><span>Comisiones PA:</span><span id="vMeTotal" class="val-minus">-$0.00</span></div>
                 <div class="summary-line total-row"><span>Saldo Real Neto:</span><span id="t2" class="val-plus">$0.00</span></div>
             </div>
@@ -263,51 +266,40 @@
             <h2>Comprobante de Cálculo</h2>
             <p id="cap-date"></p>
         </div>
-
         <div class="cap-card">
             <div class="cap-row">
-                <span class="cap-label">Tipo de operación</span>
-                <span class="cap-value" id="cap-mode"></span>
-            </div>
-            <div class="cap-row">
-                <span class="cap-label">Total Debit Facebank</span>
+                <span class="cap-label">Debitado Facebank</span>
                 <span class="cap-value" id="cap-debit" style="color:#3b82f6;"></span>
             </div>
-            <div class="cap-row">
-                <span class="cap-label">Monto enviado a PA</span>
-                <span class="cap-value" id="cap-sent"></span>
+            <div class="cap-row" style="background: rgba(34, 197, 94, 0.1); padding: 5px 0;">
+                <span class="cap-label" style="color: #fff; padding-left: 5px;">Monto Recarga Portal</span>
+                <span class="cap-value" id="cap-portal" style="padding-right: 5px;"></span>
             </div>
             <div class="cap-row">
-                <span class="cap-label">Saldo real en PA</span>
+                <span class="cap-label">Saldo Neto en Panamá</span>
                 <span class="cap-value" id="cap-net-pa" style="color:#22c55e;"></span>
             </div>
             <div class="cap-row">
-                <span class="cap-label">Tasa P2P aplicada</span>
+                <span class="cap-label">Tasa P2P</span>
                 <span class="cap-value" id="cap-tasa"></span>
             </div>
         </div>
-
         <div class="cap-result-box">
             <div class="cap-result-label">Recibes en Binance</div>
             <div class="cap-result-value" id="cap-final"></div>
         </div>
-
-        <div class="cap-footer">
-            Generado por Calculadora de Transferencia v2.0
-        </div>
+        <div class="cap-footer">Generado por Calculadora de Transferencia</div>
     </div>
 
     <script>
         let currentMode = 'recarga';
 
         window.onload = function() {
-            if(localStorage.getItem('currentMode')) {
-                setMode(localStorage.getItem('currentMode'));
-            }
+            if(localStorage.getItem('currentMode')) setMode(localStorage.getItem('currentMode'));
             const fields = ['montoR', 'montoDispo', 'pFb', 'pMe', 'pIt', 'tasa', 'cTaker'];
-            fields.forEach(field => {
-                const savedValue = localStorage.getItem(field);
-                if (savedValue !== null) document.getElementById(field).value = savedValue;
+            fields.forEach(f => {
+                const v = localStorage.getItem(f);
+                if (v !== null) document.getElementById(f).value = v;
             });
             calc();
         };
@@ -351,6 +343,7 @@
 
             document.getElementById('vFb').innerText = "-$" + cFB.toFixed(2);
             document.getElementById('vNetoEnviado').innerText = "$" + mRecarga.toFixed(2);
+            document.getElementById('vRecargaPortal').innerText = "$" + mRecarga.toFixed(2);
             document.getElementById('totalFB').innerText = "$" + tFB.toFixed(2);
             document.getElementById('vMeTotal').innerText = "-$" + totalCMe.toFixed(2);
             document.getElementById('t2').innerText = "$" + nMe.toFixed(2);
@@ -359,11 +352,9 @@
         }
 
         async function shareAsImage() {
-            // Actualizar datos de la captura antes de procesar
             document.getElementById('cap-date').innerText = new Date().toLocaleString();
-            document.getElementById('cap-mode').innerText = currentMode === 'recarga' ? 'RECARGA MERCANTIL/ZINLI' : 'POR DISPONIBLE';
             document.getElementById('cap-debit').innerText = document.getElementById('totalFB').innerText;
-            document.getElementById('cap-sent').innerText = document.getElementById('vNetoEnviado').innerText;
+            document.getElementById('cap-portal').innerText = document.getElementById('vRecargaPortal').innerText;
             document.getElementById('cap-net-pa').innerText = document.getElementById('t2').innerText;
             document.getElementById('cap-tasa').innerText = document.getElementById('tasa').value;
             document.getElementById('cap-final').innerText = document.getElementById('rBi').innerText;
@@ -373,19 +364,18 @@
                 const canvas = await html2canvas(area, { backgroundColor: '#0a0a0a', scale: 2 });
                 canvas.toBlob(async (blob) => {
                     const file = new File([blob], 'calculo.png', { type: 'image/png' });
-                    if (navigator.share && navigator.canShare({ files: [file] })) {
-                        await navigator.share({ files: [file], title: 'Resumen de Cálculo' });
+                    if (navigator.share) {
+                        await navigator.share({ files: [file], title: 'Cálculo de Transferencia' });
                     } else {
                         const link = document.createElement('a');
-                        link.download = 'calculo_transferencia.png';
+                        link.download = 'comprobante.png';
                         link.href = canvas.toDataURL();
                         link.click();
                     }
                 });
-            } catch (e) {
-                alert("Error al generar imagen.");
-            }
+            } catch (e) { alert("Error al generar imagen."); }
         }
     </script>
 </body>
 </html>
+
