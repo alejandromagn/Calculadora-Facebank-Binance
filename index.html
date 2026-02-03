@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Calculadora Compinche</title>
+    <title>Calculadora de Transferencia</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         :root {
@@ -12,7 +12,7 @@
             --input-bg: #1f1f1f;
             --fb: #3b82f6;
             --me: #22c55e;
-            --zi: #ff3d00;
+            --zi: #7c3aed;
             --bi: #f59e0b;
             --danger: #ef4444;
             --text: #ffffff;
@@ -62,6 +62,7 @@
             padding: 4px;
             margin-bottom: 20px;
             border: 1px solid #333;
+            gap: 4px;
         }
 
         .mode-btn {
@@ -72,13 +73,13 @@
             color: var(--text-dim);
             cursor: pointer;
             border-radius: 9px;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: bold;
             text-transform: uppercase;
         }
 
-        .mode-btn.active.mercantil { background: var(--me); color: white; }
-        .mode-btn.active.zinli { background: var(--zi); color: white; }
+        .mode-btn.active-me { background: var(--me); color: white; }
+        .mode-btn.active-zi { background: var(--zi); color: white; }
 
         .section {
             background: rgba(255,255,255,0.02);
@@ -117,4 +118,239 @@
             text-align: center;
         }
 
-        .res-val { font-size: 2.2rem; font-weight
+        .res-val { font-size: 2.2rem; font-weight: 800; display: block; color: white; }
+
+        .share-container { width: 100%; max-width: 480px; padding: 0 15px; box-sizing: border-box; margin-bottom: 40px; }
+        .btn-whatsapp {
+            width: 100%;
+            background: #25d366;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* --- IMAGEN DE CAPTURA --- */
+        #capture-area {
+            position: absolute;
+            left: -9999px;
+            width: 420px;
+            background: #0a0a0a;
+            color: white;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+        }
+
+        .cap-header { text-align: center; margin-bottom: 20px; }
+        .cap-header h2 { color: var(--me); margin: 0; font-size: 20px; text-transform: uppercase; }
+        .cap-header p { color: #888; font-size: 11px; margin: 5px 0; }
+        .cap-card { background: #141414; border-radius: 15px; padding: 20px; border: 1px solid #222; margin-bottom: 20px; }
+        .cap-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; border-bottom: 1px dashed #222; padding-bottom: 8px; }
+        .cap-result-box { background: linear-gradient(135deg, #16a34a, #064e3b); border-radius: 15px; padding: 25px; text-align: center; margin-bottom: 15px; }
+        .cap-result-value { font-size: 36px; font-weight: 900; display: block; }
+        .cap-loss-tag { text-align: center; background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 8px; border-radius: 8px; font-size: 12px; font-weight: bold; }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <h1 class="main-title">Calculadora de transferencia</h1>
+        <p class="sub-title">Cálculo por Monto Disponible en Facebank</p>
+        <div class="divider"></div>
+    </div>
+
+    <div class="card">
+        <div class="mode-selector">
+            <button id="btnMe" class="mode-btn active-me" onclick="setDest('mercantil')">FACEBANK A MERCANTIL</button>
+            <button id="btnZi" class="mode-btn" onclick="setDest('zinli')">FACEBANK A ZINLI</button>
+        </div>
+
+        <div class="section" style="border-top: 3px solid var(--fb);">
+            <label>Saldo Total en Facebank ($)</label>
+            <input type="number" id="montoDispo" value="100" oninput="calc()" step="any" inputmode="decimal">
+        </div>
+
+        <div class="section" style="border-left: 4px solid var(--fb);">
+            <label>% Comisión Tarjeta</label>
+            <input type="number" id="pFb" value="2.8" oninput="calc()" inputmode="decimal">
+            <div class="bank-summary">
+                <div class="summary-line"><span>Comisión:</span><span id="vFb" class="val-minus">-$0.00</span></div>
+                <div class="summary-line"><span>Neto a Recargar:</span><span id="vNetoEnviado" class="highlight">$0.00</span></div>
+                <div class="summary-line total-row"><span>Total Debitado FB:</span><span id="totalFB">$0.00</span></div>
+            </div>
+        </div>
+
+        <div class="section" id="secDestino" style="border-left: 4px solid var(--me);">
+            <div id="labelDest" style="color: var(--me); font-size: 0.7rem; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;">Recarga Mercantil Panamá</div>
+            
+            <div class="bank-summary" style="background: rgba(34, 197, 94, 0.08); border-color: #064e3b; margin-bottom: 15px; padding: 15px;">
+                <div class="summary-line">
+                    <span style="font-size: 0.75rem; font-weight: 700;">Monto Recarga Portal:</span>
+                    <span id="vRecargaPortal" style="font-weight: 800; color: #fff; font-size: 1.1rem;">$0.00</span>
+                </div>
+            </div>
+
+            <label>% Com. Recarga</label>
+            <input type="number" id="pMe" value="5.0" oninput="calc()" inputmode="decimal" style="margin-bottom:10px;">
+            
+            <div id="groupItbms">
+                <label>% ITBMS s/Com.</label>
+                <input type="number" id="pIt" value="7.0" oninput="calc()" inputmode="decimal" style="margin-bottom:10px;">
+            </div>
+            
+            <div class="bank-summary">
+                <div class="summary-line"><span>Comisiones Destino:</span><span id="vMeTotal" class="val-minus">-$0.00</span></div>
+                <div class="summary-line total-row"><span>Saldo Real Neto:</span><span id="t2" class="val-plus">$0.00</span></div>
+            </div>
+        </div>
+
+        <div class="section" style="border-left: 4px solid var(--bi);">
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1.4;">
+                    <label>Tasa P2P</label>
+                    <input type="number" id="tasa" value="1.030" step="0.001" oninput="calc()" inputmode="decimal">
+                </div>
+                <div style="flex: 1;">
+                    <label>Taker Fee</label>
+                    <input type="number" id="cTaker" value="0.08" oninput="calc()" inputmode="decimal">
+                </div>
+            </div>
+        </div>
+
+        <div class="results">
+            <small style="text-transform: uppercase; font-weight: bold; opacity: 0.8;">Neto Final Binance</small>
+            <span id="rBi" class="res-val">0.00 USDT</span>
+            <small id="vLoss" style="font-weight: bold;">Monto total de pérdida: $0.00</small>
+        </div>
+    </div>
+
+    <div class="share-container">
+        <button class="btn-whatsapp" onclick="shareAsImage()">Compartir en WhatsApp</button>
+    </div>
+
+    <div id="capture-area">
+        <div class="cap-header">
+            <h2 id="cap-title-header">Comprobante de Cálculo</h2>
+            <p id="cap-date"></p>
+        </div>
+        <div class="cap-card">
+            <div class="cap-row"><span class="cap-label">Total Debitado Facebank</span><span class="cap-value" id="cap-debit" style="color:#3b82f6;"></span></div>
+            <div class="cap-row" style="background: rgba(34, 197, 94, 0.12); padding: 8px 5px; border-radius: 4px; border-bottom: none;"><span class="cap-label" style="color: #fff;">Monto Recarga Portal</span><span class="cap-value" id="cap-portal"></span></div>
+            <div class="cap-row"><span class="cap-label" id="cap-neto-label">Saldo Neto Mercantil</span><span class="cap-value" id="cap-net-pa" style="color:#22c55e;"></span></div>
+            <div class="cap-row"><span class="cap-label">Tasa Binance P2P</span><span class="cap-value" id="cap-tasa"></span></div>
+        </div>
+        <div class="cap-result-box"><div class="cap-result-label" id="cap-res-label">Recibes en Binance</div><div class="cap-result-value" id="cap-final"></div></div>
+        <div class="cap-loss-tag" id="cap-loss-total"></div>
+    </div>
+
+    <script>
+        let destination = 'mercantil';
+
+        window.onload = function() {
+            if(localStorage.getItem('destination')) setDest(localStorage.getItem('destination'));
+            const fields = ['montoDispo', 'pFb', 'pMe', 'pIt', 'tasa', 'cTaker'];
+            fields.forEach(f => {
+                const v = localStorage.getItem(f);
+                if (v !== null) document.getElementById(f).value = v;
+            });
+            calc();
+        };
+
+        function setDest(dest) {
+            destination = dest;
+            localStorage.setItem('destination', dest);
+            
+            // UI States
+            const isMe = dest === 'mercantil';
+            document.getElementById('btnMe').classList.toggle('active-me', isMe);
+            document.getElementById('btnZi').classList.toggle('active-zi', !isMe);
+            
+            document.getElementById('secDestino').style.borderLeftColor = isMe ? 'var(--me)' : 'var(--zi)';
+            document.getElementById('labelDest').innerText = isMe ? 'Recarga Mercantil Panamá' : 'Recarga Zinli';
+            document.getElementById('labelDest').style.color = isMe ? 'var(--me)' : 'var(--zi)';
+            document.getElementById('groupItbms').classList.toggle('hidden', !isMe);
+            
+            // Set Default Zinli Fee if changing
+            if(!isMe && document.getElementById('pMe').value == "5.0") {
+                document.getElementById('pMe').value = "3.8";
+            } else if (isMe && document.getElementById('pMe').value == "3.8") {
+                document.getElementById('pMe').value = "5.0";
+            }
+            
+            calc();
+        }
+
+        function calc() {
+            const tFB = parseFloat(document.getElementById('montoDispo').value) || 0;
+            const pFb = parseFloat(document.getElementById('pFb').value) || 0;
+            const pDest = parseFloat(document.getElementById('pMe').value) || 0;
+            const pIt = (destination === 'mercantil') ? (parseFloat(document.getElementById('pIt').value) || 0) : 0;
+            const tasa = parseFloat(document.getElementById('tasa').value) || 1;
+            const cTaker = parseFloat(document.getElementById('cTaker').value) || 0;
+
+            // Save
+            ['montoDispo', 'pFb', 'pMe', 'pIt', 'tasa', 'cTaker'].forEach(f => localStorage.setItem(f, document.getElementById(f).value));
+
+            // Facebank logic
+            const cFB = tFB * (pFb / 100);
+            const mRecarga = tFB - cFB;
+
+            // Destino logic
+            const cDestPura = mRecarga * (pDest / 100);
+            const taxItbms = cDestPura * (pIt / 100);
+            const totalComDest = cDestPura + taxItbms;
+            const nNeto = mRecarga - totalComDest;
+
+            // Binance
+            const usdt = (nNeto / tasa) - cTaker;
+            const perdida = tFB - (usdt * tasa);
+
+            document.getElementById('vFb').innerText = "-$" + cFB.toFixed(2);
+            document.getElementById('vNetoEnviado').innerText = "$" + mRecarga.toFixed(2);
+            document.getElementById('vRecargaPortal').innerText = "$" + mRecarga.toFixed(2);
+            document.getElementById('totalFB').innerText = "$" + tFB.toFixed(2);
+            document.getElementById('vMeTotal').innerText = "-$" + totalComDest.toFixed(2);
+            document.getElementById('t2').innerText = "$" + nNeto.toFixed(2);
+            document.getElementById('rBi').innerText = (usdt > 0 ? usdt : 0).toFixed(2) + " USDT";
+            document.getElementById('vLoss').innerText = "Monto total de pérdida: $" + (perdida > 0 ? perdida : 0).toFixed(2);
+        }
+
+        async function shareAsImage() {
+            const isMe = destination === 'mercantil';
+            document.getElementById('cap-title-header').innerText = isMe ? "Cálculo Mercantil Panamá" : "Cálculo Recarga Zinli";
+            document.getElementById('cap-date').innerText = new Date().toLocaleString();
+            document.getElementById('cap-debit').innerText = document.getElementById('totalFB').innerText;
+            document.getElementById('cap-portal').innerText = document.getElementById('vRecargaPortal').innerText;
+            document.getElementById('cap-neto-label').innerText = isMe ? "Saldo Neto Mercantil" : "Saldo Neto Zinli";
+            document.getElementById('cap-net-pa').innerText = document.getElementById('t2').innerText;
+            document.getElementById('cap-tasa').innerText = document.getElementById('tasa').value;
+            document.getElementById('cap-final').innerText = document.getElementById('rBi').innerText;
+            document.getElementById('cap-loss-total').innerText = "Pérdida total de la operación: " + document.getElementById('vLoss').innerText.split(': ')[1];
+
+            const area = document.getElementById('capture-area');
+            try {
+                const canvas = await html2canvas(area, { backgroundColor: '#0a0a0a', scale: 2 });
+                canvas.toBlob(async (blob) => {
+                    const file = new File([blob], 'comprobante.png', { type: 'image/png' });
+                    if (navigator.share) await navigator.share({ files: [file], title: 'Cálculo Transferencia' });
+                    else {
+                        const link = document.createElement('a');
+                        link.download = 'comprobante.png';
+                        link.href = canvas.toDataURL();
+                        link.click();
+                    }
+                });
+            } catch (e) { alert("Error al compartir."); }
+        }
+    </script>
+</body>
+</html>
