@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Calculadora Precisión</title>
+    <title>Calculadora Cascada</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         :root {
@@ -44,6 +44,7 @@
             border-radius: 12px;
             padding: 4px;
             margin-bottom: 20px;
+            gap: 4px;
         }
 
         .mode-btn {
@@ -73,7 +74,7 @@
         .total-row { border-top: 1px solid #333; margin-top: 8px; padding-top: 8px; font-weight: 700; }
 
         .results {
-            background: linear-gradient(135deg, #22c55e, #15803d);
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
             color: white; padding: 20px; border-radius: 16px; text-align: center;
         }
 
@@ -81,15 +82,12 @@
 
         .btn-whatsapp {
             width: 100%; max-width: 480px; background: #25d366; color: white; border: none;
-            padding: 16px; border-radius: 14px; font-weight: bold; cursor: pointer;
+            padding: 16px; border-radius: 14px; font-weight: bold; cursor: pointer; margin-bottom: 40px;
         }
 
         #capture-area {
             position: absolute; left: -9999px; width: 400px; background: #0a0a0a; color: white; padding: 30px;
         }
-        .cap-card { background: #141414; border-radius: 15px; padding: 20px; border: 1px solid #222; margin-top: 20px; }
-        .cap-row { display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px dashed #222; padding-bottom: 8px; }
-        .cap-loss { text-align: center; color: #ef4444; font-weight: bold; margin-top: 15px; font-size: 14px; }
         .hidden { display: none; }
     </style>
 </head>
@@ -102,30 +100,31 @@
         </div>
 
         <div class="section" style="border-top: 3px solid var(--fb);">
-            <label>Saldo Facebank (Lo que tienes en la cuenta)</label>
-            <input type="number" id="montoDispo" value="100" oninput="calc()" step="any" inputmode="decimal">
+            <label>Monto Neto que deseas recibir ($)</label>
+            <input type="number" id="montoNeto" value="100" oninput="calc()" step="any" inputmode="decimal">
+        </div>
+
+        <div class="section" id="secDestino">
+            <label id="labelComBilletera">% Comisión Recarga Billetera</label>
+            <input type="number" id="pBilletera" value="5.0" oninput="calc()">
+            
+            <div id="groupItbms">
+                <label style="margin-top:10px">% ITBMS sobre comisión (Solo PA)</label>
+                <input type="number" id="pIt" value="7.0" oninput="calc()">
+            </div>
+
+            <div class="bank-summary">
+                <div class="summary-line"><span>Costo Billetera:</span><span id="vComBilletera" style="color:var(--danger)">+$0.00</span></div>
+                <div class="summary-line total-row"><span>Monto Portal (Solicitud):</span><span id="vMontoPortal" style="color:#fff;">$0.00</span></div>
+            </div>
         </div>
 
         <div class="section" style="border-left: 4px solid var(--fb);">
             <label>% Comisión Facebank (Tarjeta)</label>
             <input type="number" id="pFb" value="2.8" oninput="calc()">
             <div class="bank-summary">
-                <div class="summary-line"><span>Monto Recarga Portal:</span><span id="vRecargaPortal" style="color:var(--fb); font-weight:bold;">$0.00</span></div>
-                <div class="summary-line"><span>Cargo Comisión FB:</span><span style="color:var(--danger)">-$0.00</span><span id="vFb" class="hidden"></span></div>
-                <div class="summary-line total-row"><span>Total a Debitar Facebank:</span><span id="totalFB">$0.00</span></div>
-            </div>
-        </div>
-
-        <div class="section" id="secDestino" style="border-left: 4px solid var(--me);">
-            <label id="labelDest">Comisión Recarga</label>
-            <input type="number" id="pMe" value="5.0" oninput="calc()">
-            <div id="groupItbms">
-                <label style="margin-top:10px">% ITBMS sobre comisión</label>
-                <input type="number" id="pIt" value="7.0" oninput="calc()">
-            </div>
-            <div class="bank-summary">
-                <div class="summary-line"><span>Comisión descontada por Billetera:</span><span id="vMeTotal" style="color:var(--danger)">-$0.00</span></div>
-                <div class="summary-line total-row"><span>Saldo Neto en Mercantil/Zinli:</span><span id="t2" style="color:var(--me)">$0.00</span></div>
+                <div class="summary-line"><span>Comisión FB (sobre portal):</span><span id="vComFb" style="color:var(--danger)">+$0.00</span></div>
+                <div class="summary-line total-row" style="font-size: 1rem;"><span>TOTAL DÉBITO FACEBANK:</span><span id="vTotalDebito" style="color:var(--fb)">$0.00</span></div>
             </div>
         </div>
 
@@ -143,26 +142,25 @@
         </div>
 
         <div class="results">
-            <small>NETO FINAL BINANCE</small>
+            <small>RECIBES EN BINANCE (ESTIMADO)</small>
             <span id="rBi" class="res-val">0.00 USDT</span>
-            <small id="vLoss" style="font-weight: bold;">Monto total de pérdida: $0.00</small>
         </div>
     </div>
 
-    <button class="btn-whatsapp" onclick="shareAsImage()">Compartir en WhatsApp</button>
+    <button class="btn-whatsapp" onclick="shareAsImage()">Compartir Resultado</button>
 
     <div id="capture-area">
-        <h2 style="text-align:center; color:#22c55e;">COMPROBANTE DE CÁLCULO</h2>
-        <div class="cap-card">
-            <div class="cap-row"><span>Saldo Facebank</span><span id="cap-debit"></span></div>
-            <div class="cap-row" style="color:#3b82f6;"><span>Monto Recarga Portal</span><span id="cap-portal"></span></div>
-            <div class="cap-row" style="color:#22c55e;"><span>Saldo Neto Recibido</span><span id="cap-net-pa"></span></div>
-            <div class="cap-row"><span>Tasa Binance P2P</span><span id="cap-tasa"></span></div>
+        <h2 style="text-align:center; color:#3b82f6;">RESUMEN DE OPERACIÓN</h2>
+        <div style="background:#141414; padding:20px; border-radius:15px; border:1px solid #333;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Monto Neto:</span><span id="cap-neto"></span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Monto Portal:</span><span id="cap-portal"></span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; color:#ef4444; font-weight:bold;"><span>Débito Total FB:</span><span id="cap-debito"></span></div>
+            <hr style="border:0; border-top:1px dashed #444;">
+            <div style="text-align:center; margin-top:15px;">
+                <div style="font-size:12px; color:#aaa;">RECIBES EN BINANCE</div>
+                <div style="font-size:28px; font-weight:900; color:#22c55e;" id="cap-binance"></div>
+            </div>
         </div>
-        <div style="background:#16a34a; padding:20px; border-radius:15px; text-align:center; margin-top:20px;">
-            <div style="font-size:32px; font-weight:900;" id="cap-final"></div>
-        </div>
-        <div class="cap-loss" id="cap-loss-total"></div>
     </div>
 
     <script>
@@ -175,58 +173,58 @@
             document.getElementById('btnZi').classList.toggle('active-zi', !isMe);
             document.getElementById('secDestino').style.borderLeftColor = isMe ? 'var(--me)' : 'var(--zi)';
             document.getElementById('groupItbms').classList.toggle('hidden', !isMe);
-            document.getElementById('pMe').value = isMe ? "5.0" : "3.75";
+            
+            // Valores iniciales
+            document.getElementById('pBilletera').value = isMe ? "5.0" : "3.75";
             calc();
         }
 
         function calc() {
-            const S = parseFloat(document.getElementById('montoDispo').value) || 0;
-            const pFb = (parseFloat(document.getElementById('pFb').value) || 0) / 100;
-            const pDest = (parseFloat(document.getElementById('pMe').value) || 0) / 100;
+            const montoNeto = parseFloat(document.getElementById('montoNeto').value) || 0;
+            const pBilletera = (parseFloat(document.getElementById('pBilletera').value) || 0) / 100;
             const pIt = (destination === 'mercantil') ? (parseFloat(document.getElementById('pIt').value) || 0) / 100 : 0;
+            const pFb = (parseFloat(document.getElementById('pFb').value) || 0) / 100;
             const tasa = parseFloat(document.getElementById('tasa').value) || 1;
             const cTaker = parseFloat(document.getElementById('cTaker').value) || 0;
 
-            // 1. MONTO PORTAL (Monto que Zinli solicita al banco)
-            // Portal + (Portal * 2.8%) = Saldo Facebank
-            const portal = S / (1 + pFb);
-            const cargoFB = S - portal;
+            // 1. Calcular Monto Portal (Neto + Comisión Billetera)
+            // Para Zinli: Portal = Neto / (1 - 3.75%) -> No, según tu instrucción es SUMADO:
+            // Monto Portal = Neto + (Neto * pBilletera) + (Neto * pBilletera * itbms)
+            const comBilleteraPura = montoNeto * pBilletera;
+            const taxItbms = comBilleteraPura * pIt;
+            const totalComBilletera = comBilleteraPura + taxItbms;
+            const montoPortal = montoNeto + totalComBilletera;
 
-            // 2. COMISIÓN INTERNA (Zinli descuenta del portal antes de darte el neto)
-            const comPura = portal * pDest;
-            const itbms = comPura * pIt;
-            const totalComBilletera = comPura + itbms;
+            // 2. Calcular Facebank (sobre el Monto Portal)
+            const comFb = montoPortal * pFb;
+            const totalDebito = montoPortal + comFb;
 
-            // 3. SALDO NETO FINAL
-            const saldoNeto = portal - totalComBilletera;
-            const usdt = (saldoNeto / tasa) - cTaker;
-            const perdida = S - (usdt * tasa);
+            // 3. Binance
+            const usdt = (montoNeto / tasa) - cTaker;
 
-            document.getElementById('vRecargaPortal').innerText = "$" + portal.toFixed(2);
-            document.querySelector('.bank-summary span:nth-child(2)').innerText = "-$" + cargoFB.toFixed(2);
-            document.getElementById('totalFB').innerText = "$" + S.toFixed(2);
-            document.getElementById('vMeTotal').innerText = "-$" + totalComBilletera.toFixed(2);
-            document.getElementById('t2').innerText = "$" + saldoNeto.toFixed(2);
+            // UI
+            document.getElementById('vComBilletera').innerText = "+$" + totalComBilletera.toFixed(2);
+            document.getElementById('vMontoPortal').innerText = "$" + montoPortal.toFixed(2);
+            document.getElementById('vComFb').innerText = "+$" + comFb.toFixed(2);
+            document.getElementById('vTotalDebito').innerText = "$" + totalDebito.toFixed(2);
             document.getElementById('rBi').innerText = (usdt > 0 ? usdt : 0).toFixed(2) + " USDT";
-            document.getElementById('vLoss').innerText = "Monto total de pérdida: $" + (perdida > 0 ? perdida : 0).toFixed(2);
         }
 
         async function shareAsImage() {
-            document.getElementById('cap-debit').innerText = "$" + (parseFloat(document.getElementById('montoDispo').value) || 0).toFixed(2);
-            document.getElementById('cap-portal').innerText = document.getElementById('vRecargaPortal').innerText;
-            document.getElementById('cap-net-pa').innerText = document.getElementById('t2').innerText;
-            document.getElementById('cap-tasa').innerText = document.getElementById('tasa').value;
-            document.getElementById('cap-final').innerText = document.getElementById('rBi').innerText;
-            document.getElementById('cap-loss-total').innerText = "Pérdida Total: " + document.getElementById('vLoss').innerText.split(': ')[1];
+            document.getElementById('cap-neto').innerText = "$" + document.getElementById('montoNeto').value;
+            document.getElementById('cap-portal').innerText = document.getElementById('vMontoPortal').innerText;
+            document.getElementById('cap-debito').innerText = document.getElementById('vTotalDebito').innerText;
+            document.getElementById('cap-binance').innerText = document.getElementById('rBi').innerText;
             
             const area = document.getElementById('capture-area');
             const canvas = await html2canvas(area, { backgroundColor: '#0a0a0a', scale: 2 });
             canvas.toBlob(async (blob) => {
                 const file = new File([blob], 'calculo.png', { type: 'image/png' });
-                if (navigator.share) await navigator.share({ files: [file], title: 'Cálculo de Recarga' });
+                if (navigator.share) await navigator.share({ files: [file] });
             });
         }
-        window.onload = calc;
+
+        window.onload = () => setDest('mercantil');
     </script>
 </body>
 </html>
