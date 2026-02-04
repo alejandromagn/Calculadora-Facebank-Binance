@@ -40,14 +40,11 @@
             background: var(--input-bg);
             border: 1px solid #333;
             color: var(--text-dim);
-            width: 35px;
-            height: 35px;
+            width: 35px; height: 35px;
             border-radius: 50%;
             cursor: pointer;
             font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
         }
 
         .header-container {
@@ -94,6 +91,7 @@
         }
 
         .res-val { font-size: 2.2rem; font-weight: 800; display: block; }
+        .loss-val { font-size: 0.85rem; margin-top: 10px; opacity: 0.9; font-weight: bold; color: #ff9999; }
 
         .btn-whatsapp {
             width: 100%; max-width: 480px; background: #25d366; color: white; border: none;
@@ -169,6 +167,7 @@
         <div class="results">
             <small>RECIBES EN BINANCE</small>
             <span id="rBi" class="res-val">0.00 USDT</span>
+            <div id="vLossTotal" class="loss-val">Pérdida Total: $0.00</div>
         </div>
     </div>
 
@@ -178,10 +177,10 @@
         <div class="modal-content">
             <h3>Instrucciones</h3>
             <ol>
-                <li>Ingresa el monto que quieres recibir en tu saldo neto de Zinli.</li>
-                <li>Usa el <b>"Monto Portal"</b> para realizar la recarga en la aplicación de Zinli.</li>
-                <li>Verifica que tu saldo en Facebank cubra el <b>"Total a Debitar"</b>.</li>
-                <li>Opcional: Ingresa la tasa P2P para calcular el envío a Binance.</li>
+                <li>Ingresa el monto que quieres recibir limpio en Zinli.</li>
+                <li>Ese <b>"Monto Portal"</b> es el que pones en la app de Zinli.</li>
+                <li>El <b>"Total a Debitar"</b> es lo que debe haber en Facebank.</li>
+                <li>La <b>"Pérdida Total"</b> muestra cuánto dinero se consumió en comisiones desde Facebank hasta Binance.</li>
             </ol>
             <button class="close-modal" onclick="toggleModal()">Cerrar</button>
         </div>
@@ -197,6 +196,7 @@
             <div style="text-align:center; margin-top:20px; background:rgba(124, 58, 237, 0.1); padding:15px; border-radius:10px;">
                 <div style="font-size:11px; color:#aaa;">RECIBES EN BINANCE</div>
                 <div style="font-size:26px; font-weight:900; color:#22c55e;" id="cap-binance"></div>
+                <div style="font-size:11px; color:#ff9999; margin-top:5px; font-weight:bold;" id="cap-loss"></div>
             </div>
         </div>
     </div>
@@ -221,13 +221,20 @@
             const totalDebito = montoPortal + comFb;
 
             let usdt = 0;
-            if (tasa > 0) usdt = (montoNeto / tasa) - cTaker;
+            let perdida = totalDebito - montoNeto; // Pérdida base (Zinli + FB)
+
+            if (tasa > 0) {
+                usdt = (montoNeto / tasa) - cTaker;
+                // Si hay Binance, la pérdida es Total Debito - (Lo que recibes en Binance convertido a valor 1:1)
+                perdida = totalDebito - usdt; 
+            }
 
             document.getElementById('vComZi').innerText = comZi.toFixed(2);
             document.getElementById('vMontoPortal').innerText = "$" + montoPortal.toFixed(2);
             document.getElementById('vComFb').innerText = comFb.toFixed(2);
             document.getElementById('vTotalDebito').innerText = "$" + totalDebito.toFixed(2);
             document.getElementById('rBi').innerText = (usdt > 0 ? usdt : 0).toFixed(2) + " USDT";
+            document.getElementById('vLossTotal').innerText = "Pérdida Total: $" + (perdida > 0 ? perdida : 0).toFixed(2);
         }
 
         async function shareAsImage() {
@@ -235,6 +242,7 @@
             document.getElementById('cap-portal').innerText = document.getElementById('vMontoPortal').innerText;
             document.getElementById('cap-debito').innerText = document.getElementById('vTotalDebito').innerText;
             document.getElementById('cap-binance').innerText = document.getElementById('rBi').innerText;
+            document.getElementById('cap-loss').innerText = document.getElementById('vLossTotal').innerText;
             
             const area = document.getElementById('capture-area');
             const canvas = await html2canvas(area, { backgroundColor: '#0a0a0a', scale: 2 });
@@ -246,5 +254,4 @@
         window.onload = calc;
     </script>
 </body>
-            </html>
-            
+</html>
