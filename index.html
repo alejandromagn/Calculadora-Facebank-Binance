@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Calculadora Cascada Final</title>
+    <title>Calculadora Zinli - Alejandro</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         :root {
@@ -11,7 +11,6 @@
             --card: #141414;
             --input-bg: #1f1f1f;
             --fb: #3b82f6;
-            --me: #22c55e;
             --zi: #7c3aed;
             --bi: #f59e0b;
             --danger: #ef4444;
@@ -28,33 +27,50 @@
             color: var(--text);
         }
 
+        .top-bar {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            justify-content: flex-end;
+            padding: 15px 20px 0 0;
+            box-sizing: border-box;
+        }
+
+        .help-btn {
+            background: var(--input-bg);
+            border: 1px solid #333;
+            color: var(--text-dim);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-container {
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            padding: 10px 15px;
+            box-sizing: border-box;
+        }
+
+        .main-title { font-size: 1.2rem; font-weight: 800; margin: 0; text-transform: uppercase; color: var(--text); line-height: 1.3; }
+        .made-for { color: var(--text-dim); font-size: 0.75rem; margin: 5px 0 0 0; font-weight: 400; }
+
         .card {
             background: var(--card);
             padding: 20px;
             box-sizing: border-box;
             width: 100%; max-width: 480px;
             border-radius: 24px;
-            margin: 20px 0;
+            margin: 10px 0 20px 0;
             border: 1px solid #222;
         }
-
-        .mode-selector {
-            display: flex;
-            background: var(--input-bg);
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 20px;
-            gap: 4px;
-        }
-
-        .mode-btn {
-            flex: 1; padding: 12px; border: none; background: none;
-            color: var(--text-dim); cursor: pointer; border-radius: 9px;
-            font-size: 0.7rem; font-weight: bold; text-transform: uppercase;
-        }
-
-        .mode-btn.active-me { background: var(--me); color: white; }
-        .mode-btn.active-zi { background: var(--zi); color: white; }
 
         .section {
             background: rgba(255,255,255,0.02);
@@ -74,7 +90,7 @@
         .total-row { border-top: 1px solid #333; margin-top: 8px; padding-top: 8px; font-weight: 700; }
 
         .results {
-            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            background: linear-gradient(135deg, #7c3aed, #4c1d95);
             color: white; padding: 20px; border-radius: 16px; text-align: center;
         }
 
@@ -85,52 +101,84 @@
             padding: 16px; border-radius: 14px; font-weight: bold; cursor: pointer; margin-bottom: 40px;
         }
 
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--card);
+            margin: 15% auto;
+            padding: 25px;
+            border: 1px solid #333;
+            width: 85%;
+            max-width: 400px;
+            border-radius: 20px;
+            color: #ccc;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .modal-content h3 { color: #fff; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .close-modal {
+            background: var(--zi);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            width: 100%;
+            margin-top: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
         #capture-area {
             position: absolute; left: -9999px; width: 400px; background: #0a0a0a; color: white; padding: 30px;
         }
-        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <div class="mode-selector">
-            <button id="btnMe" class="mode-btn active-me" onclick="setDest('mercantil')">A Mercantil</button>
-            <button id="btnZi" class="mode-btn" onclick="setDest('zinli')">A Zinli</button>
-        </div>
+    <div class="top-bar">
+        <button class="help-btn" onclick="toggleModal()">?</button>
+    </div>
 
-        <div class="section" style="border-top: 3px solid var(--fb);">
-            <label>Monto Neto que deseas recibir ($)</label>
+    <div class="header-container">
+        <h1 class="main-title">Calculadora de transferencia TDD Facebank a Zinli</h1>
+        <p class="made-for">Made for Alejandro.</p>
+    </div>
+
+    <div class="card">
+        <div class="section" style="border-top: 3px solid var(--zi);">
+            <label>Monto que quieres en Zinli ($)</label>
             <input type="number" id="montoNeto" value="100" oninput="calc()" step="any" inputmode="decimal">
         </div>
 
-        <div class="section" id="secDestino">
-            <label id="labelComBilletera">% Comisión Recarga Billetera</label>
-            <input type="number" id="pBilletera" value="5.0" oninput="calc()">
-            
-            <div id="groupItbms">
-                <label style="margin-top:10px">% ITBMS sobre comisión</label>
-                <input type="number" id="pIt" value="7.0" oninput="calc()">
-            </div>
-
+        <div class="section" style="border-left: 4px solid var(--zi);">
+            <label>Paso 1: Recarga Zinli (3.75%)</label>
             <div class="bank-summary">
-                <div class="summary-line"><span>Costo Billetera:</span><span id="vComBilletera" style="color:var(--danger)">+$0.00</span></div>
-                <div class="summary-line total-row"><span>Monto Portal (Zinli/Me):</span><span id="vMontoPortal" style="color:#fff;">$0.00</span></div>
+                <div class="summary-line"><span>Comisión Zinli:</span><span style="color:var(--danger)">+$<span id="vComZi">0.00</span></span></div>
+                <div class="summary-line total-row"><span>Monto Portal a colocar:</span><span id="vMontoPortal" style="color:#fff;">$0.00</span></div>
             </div>
         </div>
 
         <div class="section" style="border-left: 4px solid var(--fb);">
-            <label>% Comisión Facebank (Tarjeta)</label>
-            <input type="number" id="pFb" value="3.60" oninput="calc()">
+            <label>Paso 2: Débito Facebank (3.60%)</label>
             <div class="bank-summary">
-                <div class="summary-line"><span>Comisión FB (3.60%):</span><span id="vComFb" style="color:var(--danger)">+$0.00</span></div>
-                <div class="summary-line total-row" style="font-size: 1rem;"><span>TOTAL DÉBITO FACEBANK:</span><span id="vTotalDebito" style="color:var(--fb)">$0.00</span></div>
+                <div class="summary-line"><span>Cargo Tarjeta FB:</span><span style="color:var(--danger)">+$<span id="vComFb">0.00</span></span></div>
+                <div class="summary-line total-row" style="font-size: 1rem;"><span>NECESITAS EN FACEBANK:</span><span id="vTotalDebito" style="color:var(--fb)">$0.00</span></div>
             </div>
         </div>
 
         <div class="section" style="border-left: 4px solid var(--bi);">
             <div style="display: flex; gap: 10px;">
-                <div style="flex: 1;">
+                <div style="flex: 1.5;">
                     <label>Tasa P2P</label>
                     <input type="number" id="tasa" placeholder="0.000" step="0.001" oninput="calc()">
                 </div>
@@ -142,75 +190,76 @@
         </div>
 
         <div class="results">
-            <small>RECIBES EN BINANCE (ESTIMADO)</small>
+            <small>RECIBES EN BINANCE</small>
             <span id="rBi" class="res-val">0.00 USDT</span>
         </div>
     </div>
 
     <button class="btn-whatsapp" onclick="shareAsImage()">Compartir Resultado</button>
 
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <h3>¿Cómo usar la calculadora?</h3>
+            <ol>
+                <li>Ingresa en la primera casilla el <b>monto exacto</b> que quieres que te quede disponible en Zinli.</li>
+                <li>Fíjate en el <b>"Monto Portal"</b>: este es el valor que debes escribir en el app de Zinli al recargar.</li>
+                <li>Asegúrate de tener en Facebank el monto indicado en <b>"Necesitas en Facebank"</b> para evitar rechazos.</li>
+                <li>Si vas a pasar a Binance, coloca la tasa actual para ver cuánto recibirás.</li>
+            </ol>
+            <button class="close-modal" onclick="toggleModal()">Entendido</button>
+        </div>
+    </div>
+
     <div id="capture-area">
-        <h2 style="text-align:center; color:#3b82f6;">RESUMEN DE OPERACIÓN</h2>
-        <div style="background:#141414; padding:20px; border-radius:15px; border:1px solid #333;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Monto Neto:</span><span id="cap-neto"></span></div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Monto Portal:</span><span id="cap-portal"></span></div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px; color:#ef4444; font-weight:bold;"><span>Débito Total FB:</span><span id="cap-debito"></span></div>
-            <hr style="border:0; border-top:1px dashed #444;">
-            <div style="text-align:center; margin-top:15px;">
-                <div style="font-size:12px; color:#aaa;">RECIBES EN BINANCE</div>
-                <div style="font-size:28px; font-weight:900; color:#22c55e;" id="cap-binance"></div>
+        <h2 style="text-align:center; color:#7c3aed; font-size: 20px;">REPORTE DE TRANSFERENCIA</h2>
+        <p style="text-align:center; font-size:10px; color:#666; margin-top:-15px;">Made for Alejandro</p>
+        <div style="background:#141414; padding:20px; border-radius:15px; border:1px solid #333; margin-top:20px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px;"><span>Monto Neto Zinli:</span><span id="cap-neto" style="font-weight:bold;"></span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px;"><span>Monto Solicitado Portal:</span><span id="cap-portal"></span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px; color:#ef4444; font-weight:bold; border-top: 1px solid #333; padding-top:10px;"><span>Débito Total Facebank:</span><span id="cap-debito"></span></div>
+            <div style="text-align:center; margin-top:20px; background:rgba(124, 58, 237, 0.1); padding:15px; border-radius:10px;">
+                <div style="font-size:11px; color:#aaa;">RECIBES EN BINANCE</div>
+                <div style="font-size:26px; font-weight:900; color:#22c55e;" id="cap-binance"></div>
             </div>
         </div>
     </div>
 
     <script>
-        let destination = 'mercantil';
+        function toggleModal() {
+            const modal = document.getElementById('helpModal');
+            modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+        }
 
-        function setDest(dest) {
-            destination = dest;
-            const isMe = dest === 'mercantil';
-            document.getElementById('btnMe').classList.toggle('active-me', isMe);
-            document.getElementById('btnZi').classList.toggle('active-zi', !isMe);
-            document.getElementById('secDestino').style.borderLeftColor = isMe ? 'var(--me)' : 'var(--zi)';
-            document.getElementById('groupItbms').classList.toggle('hidden', !isMe);
-            
-            document.getElementById('pBilletera').value = isMe ? "5.0" : "3.75";
-            calc();
+        window.onclick = function(event) {
+            const modal = document.getElementById('helpModal');
+            if (event.target == modal) modal.style.display = "none";
         }
 
         function calc() {
             const montoNeto = parseFloat(document.getElementById('montoNeto').value) || 0;
-            const pBilletera = (parseFloat(document.getElementById('pBilletera').value) || 0) / 100;
-            const pIt = (destination === 'mercantil') ? (parseFloat(document.getElementById('pIt').value) || 0) / 100 : 0;
-            const pFb = (parseFloat(document.getElementById('pFb').value) || 0) / 100;
             const tasa = parseFloat(document.getElementById('tasa').value) || 0;
             const cTaker = parseFloat(document.getElementById('cTaker').value) || 0;
 
-            // 1. Monto Portal = Neto + Comisiones de Billetera
-            const comBilleteraPura = montoNeto * pBilletera;
-            const taxItbms = comBilleteraPura * pIt;
-            const totalComBilletera = comBilleteraPura + taxItbms;
-            const montoPortal = montoNeto + totalComBilletera;
+            const pZi = 0.0375;
+            const pFb = 0.0360;
 
-            // 2. Facebank = Portal + 3.60% del Portal
+            const comZi = montoNeto * pZi;
+            const montoPortal = montoNeto + comZi;
             const comFb = montoPortal * pFb;
             const totalDebito = montoPortal + comFb;
 
-            // 3. Binance (Si hay tasa ingresada)
             let usdt = 0;
-            if (tasa > 0) {
-                usdt = (montoNeto / tasa) - cTaker;
-            }
+            if (tasa > 0) usdt = (montoNeto / tasa) - cTaker;
 
-            document.getElementById('vComBilletera').innerText = "+$" + totalComBilletera.toFixed(2);
+            document.getElementById('vComZi').innerText = comZi.toFixed(2);
             document.getElementById('vMontoPortal').innerText = "$" + montoPortal.toFixed(2);
-            document.getElementById('vComFb').innerText = "+$" + comFb.toFixed(2);
+            document.getElementById('vComFb').innerText = comFb.toFixed(2);
             document.getElementById('vTotalDebito').innerText = "$" + totalDebito.toFixed(2);
             document.getElementById('rBi').innerText = (usdt > 0 ? usdt : 0).toFixed(2) + " USDT";
         }
 
         async function shareAsImage() {
-            document.getElementById('cap-neto').innerText = "$" + document.getElementById('montoNeto').value;
+            document.getElementById('cap-neto').innerText = "$" + (parseFloat(document.getElementById('montoNeto').value) || 0).toFixed(2);
             document.getElementById('cap-portal').innerText = document.getElementById('vMontoPortal').innerText;
             document.getElementById('cap-debito').innerText = document.getElementById('vTotalDebito').innerText;
             document.getElementById('cap-binance').innerText = document.getElementById('rBi').innerText;
@@ -218,12 +267,11 @@
             const area = document.getElementById('capture-area');
             const canvas = await html2canvas(area, { backgroundColor: '#0a0a0a', scale: 2 });
             canvas.toBlob(async (blob) => {
-                const file = new File([blob], 'calculo.png', { type: 'image/png' });
+                const file = new File([blob], 'zinli-calc.png', { type: 'image/png' });
                 if (navigator.share) await navigator.share({ files: [file] });
             });
         }
-
-        window.onload = () => setDest('mercantil');
+        window.onload = calc;
     </script>
 </body>
 </html>
