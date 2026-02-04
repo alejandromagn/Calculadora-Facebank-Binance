@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Calculadora Cascada</title>
+    <title>Calculadora Cascada Final</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         :root {
@@ -109,21 +109,21 @@
             <input type="number" id="pBilletera" value="5.0" oninput="calc()">
             
             <div id="groupItbms">
-                <label style="margin-top:10px">% ITBMS sobre comisión (Solo PA)</label>
+                <label style="margin-top:10px">% ITBMS sobre comisión</label>
                 <input type="number" id="pIt" value="7.0" oninput="calc()">
             </div>
 
             <div class="bank-summary">
                 <div class="summary-line"><span>Costo Billetera:</span><span id="vComBilletera" style="color:var(--danger)">+$0.00</span></div>
-                <div class="summary-line total-row"><span>Monto Portal (Solicitud):</span><span id="vMontoPortal" style="color:#fff;">$0.00</span></div>
+                <div class="summary-line total-row"><span>Monto Portal (Zinli/Me):</span><span id="vMontoPortal" style="color:#fff;">$0.00</span></div>
             </div>
         </div>
 
         <div class="section" style="border-left: 4px solid var(--fb);">
             <label>% Comisión Facebank (Tarjeta)</label>
-            <input type="number" id="pFb" value="2.8" oninput="calc()">
+            <input type="number" id="pFb" value="3.60" oninput="calc()">
             <div class="bank-summary">
-                <div class="summary-line"><span>Comisión FB (sobre portal):</span><span id="vComFb" style="color:var(--danger)">+$0.00</span></div>
+                <div class="summary-line"><span>Comisión FB (3.60%):</span><span id="vComFb" style="color:var(--danger)">+$0.00</span></div>
                 <div class="summary-line total-row" style="font-size: 1rem;"><span>TOTAL DÉBITO FACEBANK:</span><span id="vTotalDebito" style="color:var(--fb)">$0.00</span></div>
             </div>
         </div>
@@ -132,7 +132,7 @@
             <div style="display: flex; gap: 10px;">
                 <div style="flex: 1;">
                     <label>Tasa P2P</label>
-                    <input type="number" id="tasa" value="1.030" step="0.001" oninput="calc()">
+                    <input type="number" id="tasa" placeholder="0.000" step="0.001" oninput="calc()">
                 </div>
                 <div style="flex: 1;">
                     <label>Taker Fee</label>
@@ -174,7 +174,6 @@
             document.getElementById('secDestino').style.borderLeftColor = isMe ? 'var(--me)' : 'var(--zi)';
             document.getElementById('groupItbms').classList.toggle('hidden', !isMe);
             
-            // Valores iniciales
             document.getElementById('pBilletera').value = isMe ? "5.0" : "3.75";
             calc();
         }
@@ -184,25 +183,25 @@
             const pBilletera = (parseFloat(document.getElementById('pBilletera').value) || 0) / 100;
             const pIt = (destination === 'mercantil') ? (parseFloat(document.getElementById('pIt').value) || 0) / 100 : 0;
             const pFb = (parseFloat(document.getElementById('pFb').value) || 0) / 100;
-            const tasa = parseFloat(document.getElementById('tasa').value) || 1;
+            const tasa = parseFloat(document.getElementById('tasa').value) || 0;
             const cTaker = parseFloat(document.getElementById('cTaker').value) || 0;
 
-            // 1. Calcular Monto Portal (Neto + Comisión Billetera)
-            // Para Zinli: Portal = Neto / (1 - 3.75%) -> No, según tu instrucción es SUMADO:
-            // Monto Portal = Neto + (Neto * pBilletera) + (Neto * pBilletera * itbms)
+            // 1. Monto Portal = Neto + Comisiones de Billetera
             const comBilleteraPura = montoNeto * pBilletera;
             const taxItbms = comBilleteraPura * pIt;
             const totalComBilletera = comBilleteraPura + taxItbms;
             const montoPortal = montoNeto + totalComBilletera;
 
-            // 2. Calcular Facebank (sobre el Monto Portal)
+            // 2. Facebank = Portal + 3.60% del Portal
             const comFb = montoPortal * pFb;
             const totalDebito = montoPortal + comFb;
 
-            // 3. Binance
-            const usdt = (montoNeto / tasa) - cTaker;
+            // 3. Binance (Si hay tasa ingresada)
+            let usdt = 0;
+            if (tasa > 0) {
+                usdt = (montoNeto / tasa) - cTaker;
+            }
 
-            // UI
             document.getElementById('vComBilletera').innerText = "+$" + totalComBilletera.toFixed(2);
             document.getElementById('vMontoPortal').innerText = "$" + montoPortal.toFixed(2);
             document.getElementById('vComFb').innerText = "+$" + comFb.toFixed(2);
